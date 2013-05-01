@@ -1,12 +1,7 @@
-/*final int fullSizeX = 3840;
+final int fullSizeX = 3840;
 final int fullSizeY = 1154;
 final int overSizeX = 7680;
-final int overSizeY = 2308;*/
-
-final int fullSizeX = 1920;
-final int fullSizeY = 577;
-final int overSizeX = 1920;
-final int overSizeY = 577;
+final int overSizeY = 2308;
 
 final float previewScale = 0.5f;
 
@@ -28,7 +23,7 @@ void setup()
   }
   
   testBranch = new Branch(1, 0.05f, 0.1f, 2);
-  testBranch2 = new Branch(1, 0.05f, 0.1f, 5);
+  testBranch2 = new Branch(1, 0.05f, 0.1f, 3);
 }
 
 void draw()
@@ -43,28 +38,28 @@ void draw()
   testBranch.setRadius((between+numLines) / numLines);
   if (between == 0.0f)
     testBranch.addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
-  testBranch.generateBranch(1.0f + 0.001f*frameCount, 0.5f);
+  testBranch.generateBranch(1.0f + 0.009f*frameCount, 0.5f);
   
   //testBranch2
-  final int growthSpeed2 = 13; //unit: frames per radius
+  final int growthSpeed2 = 17; //unit: frames per radius
   between = (float)(frameCount%growthSpeed2) / (growthSpeed2-1);
   numLines = testBranch2.getNumPoints() - 1;
   testBranch2.setRadius((between+numLines) / numLines);
   if (between == 0.0f)
     testBranch2.addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
-  testBranch2.generateBranch(1.0f + 0.001f*frameCount, 1.0f);
+  testBranch2.generateBranch(1.0f + 0.002f*frameCount, 0.5f);
   
   
   //draw
   currentFrame.beginDraw();
-  currentFrame.background(0, 0);
+  currentFrame.noSmooth();
   currentFrame.noStroke();
-  
+  currentFrame.background(255, 0);
+ 
   currentFrame.translate(0.0f, overSizeY / 2.0f);
   currentFrame.scale(10.0f);
   
   PVector[] strip = testBranch.getBranchStrip();
-  currentFrame.noSmooth();
   currentFrame.beginShape(TRIANGLE_STRIP);
   for (int k = 0; k < strip.length; k++)
   {
@@ -74,22 +69,24 @@ void draw()
   }
   currentFrame.endShape();
   
-  /*frames[currentFrame].strokeWeight(1.5f);
-  frames[currentFrame].noFill();
-  frames[currentFrame].smooth();
-  frames[currentFrame].beginShape();
-  for (int k = 0; k < strip.length; k++)
+  PVector branch2Base = testBranch.getLinePoint(0.3f);
+  currentFrame.translate(branch2Base.x, branch2Base.y);
+  currentFrame.rotate(0.4f);
+  
+  PVector[] strip2 = testBranch2.getBranchStrip();
+  currentFrame.beginShape(TRIANGLE_STRIP);
+  for (int k = 0; k < strip2.length; k++)
   {
-    color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip.length-1));
-    frames[currentFrame].stroke(colour);
-    frames[currentFrame].vertex(strip[k].x, strip[k].y);
+    color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip2.length-1));
+    currentFrame.fill(colour);
+    currentFrame.vertex(strip2[k].x, strip2[k].y);
   }
-  frames[currentFrame].endShape();
-  frames[currentFrame].noStroke();*/
+  currentFrame.endShape();
   currentFrame.endDraw();
   
   int frameNum = frameCount % frames.length;
   frames[frameNum].beginDraw();
+  frames[frameNum].background(255, 0);
   frames[frameNum].image(currentFrame, 0, 0, fullSizeX, fullSizeY);
   frames[frameNum].endDraw();
   image(frames[frameNum], 0, 0, width, height);
