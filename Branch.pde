@@ -240,6 +240,11 @@ class Branch
     return trunk;
   }
   
+  public int getSeed() //DEBUG
+  {
+    return seed;
+  }
+  
   private float clampAngle(float angle)
   {
     return angle < 0.0f ? (angle+TWO_PI) : (angle > TWO_PI ? (angle-TWO_PI) : angle);

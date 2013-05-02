@@ -33,10 +33,10 @@ void setup()
   testBranch = new Branch[6];
   testBranch[0] = createTrunk(1, 0.05f, 0.1f, 6);
   testBranch[1] = new Branch(1, 0.05, 0.1f, 7, testBranch[0], 0.5f, 0.07f);
-  testBranch[2] = new Branch(1, 0.05, 0.1f, 7, testBranch[0], 0.2f, 0.07f);
-  testBranch[3] = new Branch(1, 0.05, 0.1f, 7, testBranch[1], 0.3f, 0.07f);
-  testBranch[4] = new Branch(1, 0.05, 0.1f, 7, testBranch[3], 0.3f, 0.07f);
-  testBranch[5] = new Branch(1, 0.05, 0.1f, 7, testBranch[4], 0.3f, 0.07f);
+  testBranch[2] = new Branch(1, 0.05, 0.1f, 8, testBranch[0], 0.2f, 0.07f);
+  testBranch[3] = new Branch(1, 0.05, 0.1f, 9, testBranch[1], 0.3f, 0.07f);
+  testBranch[4] = new Branch(1, 0.05, 0.1f, 10, testBranch[3], 0.3f, 0.07f);
+  testBranch[5] = new Branch(1, 0.05, 0.1f, 11, testBranch[4], 0.3f, 0.07f);
   
   testTree = new Tree();
   testTree.addBranch(testBranch[0]);
@@ -52,15 +52,18 @@ void draw()
   background(255);
   
   //update
+  final int growthSpeed = 10; //unit: frames per radius
+  float between = (float)(frameCount%growthSpeed) / (growthSpeed-1);
   for (int i = 0; i < testBranch.length; i++)
   {
-    final int growthSpeed = 10; //unit: frames per radius
-    float between = (float)(frameCount%growthSpeed) / (growthSpeed-1);
     int numLines = testBranch[i].getNumPoints() - 1;
     
     testBranch[i].setRadius((between+numLines) / numLines);
     if (between == 0.0f)
+    {
+      noiseSeed(testBranch[i].getSeed());
       testBranch[i].addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
+    }
   }
   
   //draw
@@ -68,10 +71,10 @@ void draw()
   currentFrame.background(255, 0);
   
   currentFrame.translate(0.0f, overSizeY / 2.0f);
-  currentFrame.scale(10.0f);
+  currentFrame.scale(15.0f);
   try
   {
-    testTree.draw(currentFrame, 1.0f + 0.009f*frameCount);
+    testTree.draw(currentFrame, 0.5f + 0.005f*frameCount);
   }
   catch (Exception e)
   {

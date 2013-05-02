@@ -51,12 +51,12 @@ class Tree
       
       if (branch.isTrunk())
       {
-        branch.generateBranch(trunkThickness, 1.0f);
+        branch.generateBranch(trunkThickness, 0.1f);
         strips[i] = branch.getBranchStrip();
       }
       else
       {
-        branch.generateBranch(0.6f * branch.getBase().getWidth(branch.getPosOnBaseBranch()), 1.0f);
+        branch.generateBranch(0.8f * branch.getBase().getWidth(branch.getPosOnBaseBranch()), 0.1f);
         strips[i] = branch.getBranchStrip();
       }
     }
@@ -65,10 +65,8 @@ class Tree
     ArrayDeque<Branch> drawStack = new ArrayDeque<Branch>();
     drawStack.push(branches.get(0)); //push trunk
     
-    while (drawStack.size() > 0)
+    while (true)
     {
-      println(drawStack.size());
-      
       Branch baseBranch = drawStack.peek();
       
       for (Branch branch : baseBranch.getChildren())
@@ -86,10 +84,10 @@ class Tree
       {
         baseBranch.draw(frame);
         drawStack.pop();
+        if (drawStack.isEmpty())
+          break;
         frame.popMatrix();
       }
-      
-      
       
       /*if (baseBranch.getChildren().size() == 0)
       {
@@ -111,8 +109,6 @@ class Tree
         }
       }*/
     }
-    
-    println("");
     
     branches.get(0).unsetDrawnRecursive(); //Set the entire tree to undrawn
   }
