@@ -3,8 +3,10 @@ class GiftData
   ArrayList<int[]> data;
   ArrayList<ArrayList<int[]>> parts;
   int nump;
+  float dataPos;
+  int maxEntry;
   
-  public GiftData()
+  public GiftData(int numParts)
   {
     data = new ArrayList<int[]>();
   
@@ -29,9 +31,15 @@ class GiftData
     {
       e.printStackTrace();
     }
+    
+    nump = numParts;
+    dataPos = 0.0f;
+    maxEntry = getLargestAmt(1.0f);
+    
+    parts = new ArrayList<ArrayList<int[]>>();
   }
   
-  public void partition(float pos, int numParts)
+  public void partitionWhole(float pos, int numParts)
   {
     nump = numParts;
     int limit = floor(pos * (float)data.size());
@@ -59,6 +67,41 @@ class GiftData
     
     //for (int i = 0; i < numParts; i++)
     //  println(parts.get(i).size());
+  }
+  
+  public boolean partitionNext(float stepSize) //assuming 0 < dataLength < 1
+  {
+    float numEntries = stepSize * data.size();
+    if (dataPos + numEntries > data.size() - 1)
+    {
+      if (dataPos >= data.size() - 1)
+        return false;
+      numEntries = data.size() - dataPos - 1;
+    }
+    
+    for (int i = 0; i < nump; i++)
+      parts.add(new ArrayList<int[]>());
+      
+    int dataPosWhole = floor(dataPos);
+    int numEntriesWhole = floor(numEntries);
+    
+    for (int i = dataPosWhole; i < dataPosWhole+numEntriesWhole; i++)
+    {
+      int entry = data.get(i)[1];
+      if (entry == 0)
+        continue;
+      
+      float logEntry = log(entry);
+      int partsIndex = floor(nump * logEntry/log(maxEntry));
+      
+      if (partsIndex >= nump)
+        partsIndex = nump - 1;
+      
+      parts.get(nump - partsIndex - 1).add(new int[]{i, entry}); //Small entries go in higher partitions (descending)
+    }
+    
+    dataPos += numEntries;
+    return true;
   }
   
   public int getLargestAmt(float pos)

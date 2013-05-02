@@ -7,8 +7,8 @@ final float previewScale = 0.5f;
 
 PGraphics[] frames;
 PGraphics currentFrame;
-Branch[] testBranch;
 Tree testTree;
+GiftData data;
 
 void setup()
 {
@@ -30,21 +30,9 @@ void setup()
     frames[i].endDraw();
   }
   
-  testBranch = new Branch[6];
-  testBranch[0] = createTrunk(1, 0.05f, 0.1f, 6);
-  testBranch[1] = new Branch(1, 0.05, 0.1f, 7, testBranch[0], 0.5f, 0.07f);
-  testBranch[2] = new Branch(1, 0.05, 0.1f, 8, testBranch[0], 0.3f, 0.07f);
-  testBranch[3] = new Branch(1, 0.05, 0.1f, 9, testBranch[1], 0.4f, 0.07f);
-  testBranch[4] = new Branch(1, 0.05, 0.1f, 10, testBranch[3], 0.3f, 0.07f);
-  testBranch[5] = new Branch(1, 0.05, 0.1f, 11, testBranch[4], 0.3f, 0.07f);
+  data = new GiftData(7);
   
-  testTree = new Tree();
-  testTree.addBranch(testBranch[0]);
-  testTree.addBranch(testBranch[1]);
-  testTree.addBranch(testBranch[2]);
-  testTree.addBranch(testBranch[3]);
-  testTree.addBranch(testBranch[4]);
-  testTree.addBranch(testBranch[5]);
+  testTree = new Tree(data, 87);
 }
 
 void draw()
@@ -52,29 +40,18 @@ void draw()
   background(255);
   
   //update
-  for (int i = 0; i < testBranch.length; i++)
-  {
-    int growthSpeed = 10 * (testBranch[i].getTreeHeight()+1); //unit: frames per radius
-    float between = (float)(frameCount%growthSpeed) / (growthSpeed-1);
-    int numLines = testBranch[i].getNumPoints() - 1;
-    
-    testBranch[i].setRadius((between+numLines) / numLines);
-    if (between == 0.0f)
-    {
-      noiseSeed(testBranch[i].getSeed());
-      testBranch[i].addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
-    }
-  }
+  testTree.update(frameCount);
+  
   
   //draw
   currentFrame.beginDraw();
   currentFrame.background(255, 0);
   
   currentFrame.translate(0.0f, overSizeY / 2.0f);
-  currentFrame.scale(15.0f);
+  currentFrame.scale(10.0f);
   try
   {
-    testTree.draw(currentFrame, 0.5f + 0.005f*frameCount);
+    testTree.draw(currentFrame, 0.5f + 0.03f*frameCount);
   }
   catch (Exception e)
   {

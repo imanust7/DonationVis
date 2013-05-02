@@ -74,7 +74,7 @@ class Branch
   
   public void addPoint(float relAngle)
   {
-    float newAngle = lineAngles.get(lineAngles.size()-1) + relAngle;
+    float newAngle = getTipAngle() + relAngle;
     //PVector lastPoint = linePoints.get(linePoints.size()-1);
     
     //linePoints.add(new PVector(lastPoint.x + radius*cos(newAngle), lastPoint.y + radius*sin(newAngle)));
@@ -242,9 +242,14 @@ class Branch
     return trunk;
   }
   
-  public int getSeed() //DEBUG
+  public int getSeed()
   {
     return seed;
+  }
+  
+  public float getTipAngle()
+  {
+    return lineAngles.get(lineAngles.size()-1);
   }
   
   public int getTreeHeight()
