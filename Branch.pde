@@ -25,13 +25,6 @@ class Branch
     radius = 1.0f;
     initialPos = new PVector(0.0f, 0.0f);
     base = baseBranch;
-    if (base == null)
-      trunk = true;
-    else
-    {
-      trunk = false;
-      base.addChild(this);
-    }
     basePos = baseBranchPos;
     drawn = false;
     angle = initialAngle;
@@ -40,11 +33,19 @@ class Branch
     currentStartThickness = -1.0f;
     currentEndThickness = -1.0f;
     seed = perlinSeed;
-    treeHeight = calcTreeHeight();
     
     children = new ArrayList<Branch>();
     lineAngles = new ArrayList<Float>();
     lineAngles.add(0.0f);
+    if (base == null)
+      trunk = true;
+    else
+    {
+      trunk = false;
+      base.addChild(this);
+    }
+    
+    treeHeight = calcTreeHeight();
     
     noiseSeed(perlinSeed);
     

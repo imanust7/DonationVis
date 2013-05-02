@@ -32,7 +32,7 @@ void setup()
   
   data = new GiftData(7);
   
-  testTree = new Tree(data, 87);
+  testTree = new Tree(data, 56);
 }
 
 void draw()

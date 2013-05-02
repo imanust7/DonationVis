@@ -79,6 +79,7 @@ class GiftData
       numEntries = data.size() - dataPos - 1;
     }
     
+    parts = new ArrayList<ArrayList<int[]>>();
     for (int i = 0; i < nump; i++)
       parts.add(new ArrayList<int[]>());
       

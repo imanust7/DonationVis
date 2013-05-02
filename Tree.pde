@@ -36,12 +36,13 @@ class Tree
     Branch trunk = branches.get(0).get(0);
     
     if (!data.partitionNext(1.0f / 9000.0f))
-      break;
+      return;
     
     for (int i = 0; i < data.getNumParts(); i++)
+    {
       for (int j = 0; j < data.getPartitionSize(i); j++)
       {
-        if (random(1.0f) > 10.0f*i / (data.getNumParts() + data.getPartitionSize(i)))
+        if (random(1.0f) < 0.3f*i / pow(data.getNumParts()+data.getPartitionSize(i), 2))
         {
           //Create new branches
           int treeLevel = floor(map(i, 0, data.getNumParts()-1, 0, branches.size()));
@@ -50,21 +51,49 @@ class Tree
           if (treeLevel == 0)
           {
             base = trunk;
-            basePos = random(0.1f, 0.7f);
+            basePos = random(0.05f, 0.4f);
           }
           else
           {
-            base = branches.get(treeLevel - 1).get(floor(random(branches.get(treeLevel-1).size())));
+            int getIndex = floor(random(branches.get(treeLevel-1).size()));
+            //println(getIndex);
+            base = branches.get(treeLevel - 1).get(getIndex);
             basePos = random(0.4f, 0.7f);
           }
           
-          println(totalBranchCounter);
-          addBranch(new Branch(1, 0.05f, 0.1f, seed + totalBranchCounter, base, basePos, random(-1.0f, 1.0f)));
+          //println(totalBranchCounter);
+          addBranch(new Branch(1, 0.07f, 0.2f, seed + totalBranchCounter, base, basePos, random(-1.0f, 1.0f)));
           totalBranchCounter++;
         }
       }
-      
-      
+    }
+    
+   // println("");
+    
+    /*for (int i = 0; i < branches.size(); i++)
+    {
+      for (int j = 0; j < branches.get(i).size(); j++)
+      {
+        Branch branch = branches.get(i).get(j);
+        if (branch.getTreeHeight() != 0)
+        {
+          try
+          {
+            println(branch.getBase().getTreeHeight());
+          }
+          catch (Exception e)
+          {
+          }
+        }
+      }
+      //println(branches.get(i).size());
+    }*/
+    //println("");
+    //ArrayList<Branch> trunkChildren = branches.get(0).get(0).getChildren();
+   // for (Branch branch : trunkChildren)
+    //  println(branch.getSeed());
+   // println("");
+    
     //Grow existing branches
     //Always grow trunk
     float lastAngle = trunk.getTipAngle();
@@ -85,16 +114,18 @@ class Tree
     //Grow branches more the closer they are to the trunk
     for (ArrayList<Branch> level : branches)
       for (Branch branch : level)
+      {
         if (branch.getTreeHeight() > 0 && random(1.0f) < 0.4f / branch.getTreeHeight())
         {
           noiseSeed(branch.getSeed());
           branch.addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
         }
+      }
   }
   
   public void draw(PGraphics frame, float trunkThickness) throws Exception
   {
-    PVector strips[][] = new PVector[branches.size()][];
+    //PVector strips[][] = new PVector[branches.size()][];
     
     //First compute all branches
     for (int i = 0; i < branches.size(); i++)
@@ -105,16 +136,14 @@ class Tree
       {
         Branch branch = bi.get(j);
         
+        //println(branch.getTreeHeight());
+        
         if (branch.isTrunk())
-        {
           branch.generateBranch(trunkThickness, 0.1f);
-          strips[i] = branch.getBranchStrip();
-        }
         else
-        {
           branch.generateBranch(0.9f * branch.getBase().getWidth(branch.getPosOnBaseBranch()), 0.1f);
-          strips[i] = branch.getBranchStrip();
-        }
+        
+        //strips[i] = branch.getBranchStrip();
       }
     }
     
@@ -122,24 +151,26 @@ class Tree
     ArrayDeque<Branch> drawStack = new ArrayDeque<Branch>();
     drawStack.push(branches.get(0).get(0)); //push trunk
     
+    //There is a problem here: only the first branch off the trunk is rendered
     while (true)
     {
-      Branch baseBranch = drawStack.peek();
+      Branch baseBranch = drawStack.peek(); //First pass: baseBranch = trunk. Second pass: baseBranch = firstBranchOffTrunk
+      //Third pass: baseBranch = trunk
       
       for (Branch branch : baseBranch.getChildren())
       {
-        if (!branch.drawn())
+        if (!branch.drawn()) //First pass: branch = first branch off trunk
         {
           frame.pushMatrix();
           branch.transformTo(frame, 0.2f); //DEBUG: implement angle offset (sway)
           drawStack.push(branch);
+          break;
         }
-        break;
       }
-      
+      //First pass: drawStack: firstBranchOffTrunk, Trunk
       if (drawStack.peek() == baseBranch) //Either all children have been drawn or there are no children
       {
-        baseBranch.draw(frame);
+        baseBranch.draw(frame); //Second pass: jump in here
         drawStack.pop();
         if (drawStack.isEmpty())
           break;
