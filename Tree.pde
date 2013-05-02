@@ -1,3 +1,5 @@
+import java.util.ArrayDeque;
+
 class Tree
 {
   //ArrayList<ArrayList<Branch>> branches;
@@ -5,7 +7,7 @@ class Tree
 
   public Tree()
   {
-    branches = new ArrayList<ArrayList<Branch>>();
+    branches = new ArrayList<Branch>();
   }
   
   public void addBranch(Branch branch)
@@ -27,9 +29,9 @@ class Tree
     branches.add(branch);
   }
   
-  public void draw(PGraphics frame)
+  public void draw(PGraphics frame, float trunkThickness) throws Exception
   {
-    PVector strips[][] = new PVector[][branches.size()];
+    PVector strips[][] = new PVector[branches.size()][];
     
     //First compute all branches
     /*for (int i = 0; i < branches.size(); i++)
@@ -45,9 +47,18 @@ class Tree
     }*/
     for (int i = 0; i < branches.size(); i++)
     {
-      Branch bi = branches.get(i);
-      bi.generateBranch(9999999.0f, 1.0f); //DEBUG: figure out what base width should be
-      strips[i] = bi.getBranchStrip();
+      Branch branch = branches.get(i);
+      
+      if (branch.isTrunk())
+      {
+        branch.generateBranch(trunkThickness, 1.0f);
+        strips[i] = branch.getBranchStrip();
+      }
+      else
+      {
+        branch.generateBranch(0.6f * branch.getBase().getWidth(branch.getPosOnBaseBranch()), 1.0f);
+        strips[i] = branch.getBranchStrip();
+      }
     }
     
     //Then render them
@@ -56,6 +67,8 @@ class Tree
     
     while (drawStack.size() > 0)
     {
+      println(drawStack.size());
+      
       Branch baseBranch = drawStack.peek();
       
       for (Branch branch : baseBranch.getChildren())
@@ -98,6 +111,8 @@ class Tree
         }
       }*/
     }
+    
+    println("");
     
     branches.get(0).unsetDrawnRecursive(); //Set the entire tree to undrawn
   }

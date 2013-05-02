@@ -13,26 +13,38 @@ class Branch
   ArrayList<Branch> children;
   boolean drawn;
   float angle;
+  boolean trunk;
+  int seed;
+  float currentStartThickness, currentEndThickness;
  // PVector[] branchLines;
   
   //0 < straightness < 1, noise is Perlin noise multiplier
-  public Branch(int numPoints, float noiseAmt, float noiseScale, int seed, Branch baseBranch, float baseBranchPos, float initialAngle) //Angle relative to base branch
+  public Branch(int numPoints, float noiseAmt, float noiseScale, int perlinSeed, Branch baseBranch, float baseBranchPos, float initialAngle) //Angle relative to base branch
   {
     radius = 1.0f;
     initialPos = new PVector(0.0f, 0.0f);
     base = baseBranch;
-    base.addChild(this);
-    baseBranchPos = basePos;
+    if (base == null)
+      trunk = true;
+    else
+    {
+      trunk = false;
+      base.addChild(this);
+    }
+    basePos = baseBranchPos;
     drawn = false;
     angle = initialAngle;
     baseColour = color(76, 61, 59);
     tipColour = color(153, 123, 118);
+    currentStartThickness = -1.0f;
+    currentEndThickness = -1.0f;
+    seed = perlinSeed;
     
     children = new ArrayList<Branch>();
     lineAngles = new ArrayList<Float>();
     lineAngles.add(0.0f);
     
-    noiseSeed(seed);
+    noiseSeed(perlinSeed);
     
     for (int i = 0; i < numPoints; i++)
     {
@@ -69,6 +81,9 @@ class Branch
   
   public void generateBranch(float startThickness, float endThickness)
   {
+    currentStartThickness = startThickness;
+    currentEndThickness = endThickness;
+    
     PVector pOld = initialPos;
     PVector pCurrent = new PVector(pOld.x + radius*cos(lineAngles.get(0)), pOld.y + radius*sin(lineAngles.get(0)));
     PVector pNew = new PVector(pCurrent.x + radius*cos(lineAngles.get(1)), pCurrent.y + radius*sin(lineAngles.get(1)));
@@ -133,9 +148,17 @@ class Branch
   
   public void transformTo(PGraphics frame, float angleOffset)
   {
-    PVector branchBase = base.getLinePoint(basePos);
-    frame.translate(branchBase.x, branchBase.y);
-    frame.rotate(angle + angleOffset);
+    if (!trunk)
+    {
+      PVector branchBase = base.getLinePoint(basePos);
+      frame.translate(branchBase.x, branchBase.y);
+      frame.rotate(angle + angleOffset);
+    }
+  }
+  
+  public float getPosOnBaseBranch()
+  {
+    return basePos;
   }
   
   public void draw(PGraphics frame)
@@ -187,10 +210,13 @@ class Branch
     return lineAngles.size();
   }
   
-  /*public float getWidth(float pos)
+  public float getWidth(float pos) throws Exception //0 < pos < 1
   {
-    return lerp(startThickness, endThickness, pos);
-  }*/
+    if (currentStartThickness < 0.0f)
+      throw new Exception("The branch must be generated at least once before getWidth(float) is called.");
+    
+    return lerp(currentStartThickness, currentEndThickness, pos);
+  }
   
   public void setBaseColour(color colour)
   {
@@ -202,13 +228,25 @@ class Branch
     tipColour = colour;
   }
   
-  public Branch getBase()
+  public Branch getBase() throws Exception
   {
+    if (trunk)
+      throw new Exception("Tried to get base of trunk. Does not exist.");
     return base;
+  }
+  
+  public boolean isTrunk()
+  {
+    return trunk;
   }
   
   private float clampAngle(float angle)
   {
     return angle < 0.0f ? (angle+TWO_PI) : (angle > TWO_PI ? (angle-TWO_PI) : angle);
   }
+}
+
+Branch createTrunk(int numPoints, float noiseAmt, float noiseScale, int seed)
+{
+  return new Branch(numPoints, noiseAmt, noiseScale, seed, null, 0.0f, 0.0f);
 }

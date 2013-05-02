@@ -7,7 +7,8 @@ final float previewScale = 0.5f;
 
 PGraphics[] frames;
 PGraphics currentFrame;
-Branch testBranch, testBranch2;
+Branch[] testBranch;
+Tree testTree;
 
 void setup()
 {
@@ -16,14 +17,34 @@ void setup()
   background(255);
   
   currentFrame = createGraphics(overSizeX, overSizeY);
+  currentFrame.beginDraw();
+  currentFrame.noSmooth();
+  currentFrame.noStroke();
+  currentFrame.endDraw();
   frames = new PGraphics[5];
   for (int i = 0; i < frames.length; i++)
   {
     frames[i] = createGraphics(fullSizeX, fullSizeY);
+    frames[i].beginDraw();
+    frames[i].noStroke();
+    frames[i].endDraw();
   }
   
-  testBranch = new Branch(1, 0.05f, 0.1f, 2);
-  testBranch2 = new Branch(1, 0.05f, 0.1f, 3);
+  testBranch = new Branch[6];
+  testBranch[0] = createTrunk(1, 0.05f, 0.1f, 6);
+  testBranch[1] = new Branch(1, 0.05, 0.1f, 7, testBranch[0], 0.5f, 0.07f);
+  testBranch[2] = new Branch(1, 0.05, 0.1f, 7, testBranch[0], 0.2f, 0.07f);
+  testBranch[3] = new Branch(1, 0.05, 0.1f, 7, testBranch[1], 0.3f, 0.07f);
+  testBranch[4] = new Branch(1, 0.05, 0.1f, 7, testBranch[3], 0.3f, 0.07f);
+  testBranch[5] = new Branch(1, 0.05, 0.1f, 7, testBranch[4], 0.3f, 0.07f);
+  
+  testTree = new Tree();
+  testTree.addBranch(testBranch[0]);
+  testTree.addBranch(testBranch[1]);
+  testTree.addBranch(testBranch[2]);
+  testTree.addBranch(testBranch[3]);
+  testTree.addBranch(testBranch[4]);
+  testTree.addBranch(testBranch[5]);
 }
 
 void draw()
@@ -31,59 +52,32 @@ void draw()
   background(255);
   
   //update
-  //testBranch
-  final int growthSpeed = 10; //unit: frames per radius
-  float between = (float)(frameCount%growthSpeed) / (growthSpeed-1);
-  int numLines = testBranch.getNumPoints() - 1;
-  testBranch.setRadius((between+numLines) / numLines);
-  if (between == 0.0f)
-    testBranch.addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
-  testBranch.generateBranch(1.0f + 0.009f*frameCount, 0.5f);
-  
-  //testBranch2
-  final int growthSpeed2 = 17; //unit: frames per radius
-  between = (float)(frameCount%growthSpeed2) / (growthSpeed2-1);
-  numLines = testBranch2.getNumPoints() - 1;
-  testBranch2.setRadius((between+numLines) / numLines);
-  if (between == 0.0f)
-    testBranch2.addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
-  testBranch2.generateBranch(1.0f + 0.002f*frameCount, 0.5f);
-  
+  for (int i = 0; i < testBranch.length; i++)
+  {
+    final int growthSpeed = 10; //unit: frames per radius
+    float between = (float)(frameCount%growthSpeed) / (growthSpeed-1);
+    int numLines = testBranch[i].getNumPoints() - 1;
+    
+    testBranch[i].setRadius((between+numLines) / numLines);
+    if (between == 0.0f)
+      testBranch[i].addPoint(0.08f * (noise(0.02f * frameCount) - 0.5f));
+  }
   
   //draw
   currentFrame.beginDraw();
-  currentFrame.noSmooth();
-  currentFrame.noStroke();
   currentFrame.background(255, 0);
- 
-  PVector[] strip = testBranch.getBranchStrip();
-  PVector[] strip2 = testBranch2.getBranchStrip();
-  PVector branch2Base = testBranch.getLinePoint(0.3f);
   
   currentFrame.translate(0.0f, overSizeY / 2.0f);
   currentFrame.scale(10.0f);
-  
-  currentFrame.pushMatrix();
-  currentFrame.translate(branch2Base.x, branch2Base.y);
-  currentFrame.rotate(0.4f);
-  currentFrame.beginShape(TRIANGLE_STRIP);
-  for (int k = 0; k < strip2.length; k++)
+  try
   {
-    color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip2.length-1));
-    currentFrame.fill(colour);
-    currentFrame.vertex(strip2[k].x, strip2[k].y);
+    testTree.draw(currentFrame, 1.0f + 0.009f*frameCount);
   }
-  currentFrame.endShape();
-  currentFrame.popMatrix();
-  
-  currentFrame.beginShape(TRIANGLE_STRIP);
-  for (int k = 0; k < strip.length; k++)
+  catch (Exception e)
   {
-    color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip.length-1));
-    currentFrame.fill(colour);
-    currentFrame.vertex(strip[k].x, strip[k].y);
+    e.printStackTrace();
+    println(e.getMessage());
   }
-  currentFrame.endShape();
   currentFrame.endDraw();
   
   int frameNum = frameCount % frames.length;
