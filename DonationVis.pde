@@ -56,30 +56,32 @@ void draw()
   currentFrame.noStroke();
   currentFrame.background(255, 0);
  
+  PVector[] strip = testBranch.getBranchStrip();
+  PVector[] strip2 = testBranch2.getBranchStrip();
+  PVector branch2Base = testBranch.getLinePoint(0.3f);
+  
   currentFrame.translate(0.0f, overSizeY / 2.0f);
   currentFrame.scale(10.0f);
   
-  PVector[] strip = testBranch.getBranchStrip();
-  currentFrame.beginShape(TRIANGLE_STRIP);
-  for (int k = 0; k < strip.length; k++)
-  {
-    color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip.length-1));
-    currentFrame.fill(colour);
-    currentFrame.vertex(strip[k].x, strip[k].y);
-  }
-  currentFrame.endShape();
-  
-  PVector branch2Base = testBranch.getLinePoint(0.3f);
+  currentFrame.pushMatrix();
   currentFrame.translate(branch2Base.x, branch2Base.y);
   currentFrame.rotate(0.4f);
-  
-  PVector[] strip2 = testBranch2.getBranchStrip();
   currentFrame.beginShape(TRIANGLE_STRIP);
   for (int k = 0; k < strip2.length; k++)
   {
     color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip2.length-1));
     currentFrame.fill(colour);
     currentFrame.vertex(strip2[k].x, strip2[k].y);
+  }
+  currentFrame.endShape();
+  currentFrame.popMatrix();
+  
+  currentFrame.beginShape(TRIANGLE_STRIP);
+  for (int k = 0; k < strip.length; k++)
+  {
+    color colour = lerpColor(color(76, 61, 59), color(153, 123, 118), (float)k/(strip.length-1));
+    currentFrame.fill(colour);
+    currentFrame.vertex(strip[k].x, strip[k].y);
   }
   currentFrame.endShape();
   currentFrame.endDraw();

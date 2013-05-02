@@ -7,17 +7,29 @@ class Branch
   ArrayList<Float> lineAngles;
   PVector[] branchStrip;
   float radius;
+  Branch base;
+  float basePos;
+  color baseColour, tipColour;
+  ArrayList<Branch> children;
+  boolean drawn;
+  float angle;
  // PVector[] branchLines;
   
   //0 < straightness < 1, noise is Perlin noise multiplier
-  public Branch(int numPoints, float noiseAmt, float noiseScale, int seed)
+  public Branch(int numPoints, float noiseAmt, float noiseScale, int seed, Branch baseBranch, float baseBranchPos, float initialAngle) //Angle relative to base branch
   {
     radius = 1.0f;
     initialPos = new PVector(0.0f, 0.0f);
+    base = baseBranch;
+    base.addChild(this);
+    baseBranchPos = basePos;
+    drawn = false;
+    angle = initialAngle;
+    baseColour = color(76, 61, 59);
+    tipColour = color(153, 123, 118);
     
-    //linePoints = new ArrayList<PVector>();
+    children = new ArrayList<Branch>();
     lineAngles = new ArrayList<Float>();
-    //linePoints.add(p0);
     lineAngles.add(0.0f);
     
     noiseSeed(seed);
@@ -45,12 +57,6 @@ class Branch
       lineAngles.add(newAngle);
     }
   }
-  
-  /*public Branch(final PVector[] lp)
-  {
-    linePoints = lp;
-    generateBranch(1.0f, 0.0f);
-  }*/
   
   public void addPoint(float relAngle)
   {
@@ -102,6 +108,50 @@ class Branch
     branchStrip[2*getNumPoints() - 1] = PVector.sub(pNew, PVector.mult(diff, endThickness));
   }
   
+  public void addChild(Branch branch)
+  {
+    children.add(branch);
+  }
+  
+  public void unsetDrawnRecursive()
+  {
+    drawn = false;
+    
+    for (Branch branch : children)
+      branch.unsetDrawnRecursive();
+  }
+  
+  public boolean drawn()
+  {
+    return drawn;
+  }
+  
+  public ArrayList<Branch> getChildren()
+  {
+    return children;
+  }
+  
+  public void transformTo(PGraphics frame, float angleOffset)
+  {
+    PVector branchBase = base.getLinePoint(basePos);
+    frame.translate(branchBase.x, branchBase.y);
+    frame.rotate(angle + angleOffset);
+  }
+  
+  public void draw(PGraphics frame)
+  {
+    frame.beginShape(TRIANGLE_STRIP);
+    for (int k = 0; k < branchStrip.length; k++)
+    {
+      color colour = lerpColor(baseColour, tipColour, (float)k/(branchStrip.length-1));
+      currentFrame.fill(colour);
+      currentFrame.vertex(branchStrip[k].x, branchStrip[k].y);
+    }
+    frame.endShape();
+    
+    drawn = true;
+  }
+  
   public void setRadius(float newRadius)
   {
     radius = newRadius;
@@ -109,12 +159,6 @@ class Branch
   
   public PVector[] getBranchStrip()
   {
-    //PVector[] points = new PVector[branchStrip.length];
-    
-    //for (int i = 0; i < branchStrip.length; i++)
-    //  points[i] = new PVector(branchStrip[i].x, branchStrip[i].y);
-      
-    //return points;
     return branchStrip;
   }
   
@@ -147,6 +191,21 @@ class Branch
   {
     return lerp(startThickness, endThickness, pos);
   }*/
+  
+  public void setBaseColour(color colour)
+  {
+    baseColour = colour;
+  }
+  
+  public void setTipColour(color colour)
+  {
+    tipColour = colour;
+  }
+  
+  public Branch getBase()
+  {
+    return base;
+  }
   
   private float clampAngle(float angle)
   {
