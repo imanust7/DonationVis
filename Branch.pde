@@ -15,6 +15,7 @@ class Branch
   float angle;
   boolean trunk;
   int seed;
+  int treeHeight;
   float currentStartThickness, currentEndThickness;
  // PVector[] branchLines;
   
@@ -39,6 +40,7 @@ class Branch
     currentStartThickness = -1.0f;
     currentEndThickness = -1.0f;
     seed = perlinSeed;
+    treeHeight = calcTreeHeight();
     
     children = new ArrayList<Branch>();
     lineAngles = new ArrayList<Float>();
@@ -243,6 +245,33 @@ class Branch
   public int getSeed() //DEBUG
   {
     return seed;
+  }
+  
+  public int getTreeHeight()
+  {
+    return treeHeight;
+  }
+  
+  private int calcTreeHeight()
+  {
+    if (trunk)
+      return 0;
+    
+    Branch branch = this;
+    int tHeight = 1;
+    
+    try
+    {
+      while (!(branch = branch.getBase()).isTrunk())
+        tHeight++;
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      println(e.getMessage());
+    }
+    
+    return tHeight;
   }
   
   private float clampAngle(float angle)

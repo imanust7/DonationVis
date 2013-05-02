@@ -12,20 +12,6 @@ class Tree
   
   public void addBranch(Branch branch)
   {
-    /*for (int i = 0; i < branches.size(); i++)
-      for (int j = 0; j < branches.get(i).size(); j++)
-      {
-        if (branches.get(i).get(j) == branch.getBase())
-        {
-          if (i == branches.size() - 1)
-            branches.add(new ArrayList<Branch>());
-          
-          branches.get(i+1).add(branch);
-        }
-        
-        break;
-      }*/
-    
     branches.add(branch);
   }
   
@@ -34,17 +20,6 @@ class Tree
     PVector strips[][] = new PVector[branches.size()][];
     
     //First compute all branches
-    /*for (int i = 0; i < branches.size(); i++)
-    {
-      ArrayList<Branch> bi = branches.get(i);
-      strips[i] = new PVector[][bi.size()];
-      
-      for (int j = 0; j < bi.size(); j++)
-      {
-        bi.get(j).generateBranch(9999999.0f, 1.0f);
-        strips[i][j] = bi.get(j).getBranchStrip();
-      }
-    }*/
     for (int i = 0; i < branches.size(); i++)
     {
       Branch branch = branches.get(i);
@@ -56,7 +31,7 @@ class Tree
       }
       else
       {
-        branch.generateBranch(0.8f * branch.getBase().getWidth(branch.getPosOnBaseBranch()), 0.1f);
+        branch.generateBranch(0.9f * branch.getBase().getWidth(branch.getPosOnBaseBranch()), 0.1f);
         strips[i] = branch.getBranchStrip();
       }
     }
@@ -74,7 +49,7 @@ class Tree
         if (!branch.drawn())
         {
           frame.pushMatrix();
-          branch.transformTo(frame, 0.0f); //DEBUG: implement angle offset (sway)
+          branch.transformTo(frame, 0.2f); //DEBUG: implement angle offset (sway)
           drawStack.push(branch);
         }
         break;
@@ -88,39 +63,8 @@ class Tree
           break;
         frame.popMatrix();
       }
-      
-      /*if (baseBranch.getChildren().size() == 0)
-      {
-        baseBranch.draw(frame);
-        drawStack.pop();
-        frame.popMatrix();
-      }
-      else
-      {
-        for (Branch branch : baseBranch.getChildren())
-        {
-          if (!branch.drawn())
-          {
-            frame.pushMatrix();
-            branch.transformTo(frame, 0.0f); //DEBUG: implement angle offset (sway)
-            drawStack.push(branch);
-          }
-          break;
-        }
-      }*/
     }
     
     branches.get(0).unsetDrawnRecursive(); //Set the entire tree to undrawn
   }
 }
-
-/*public void renderUpTree(PGraphics frame, ArrayList<Branch> children)
-{
-  for (Branch child : children)
-  {
-    frame.pushMatrix();
-    
-    
-    renderUpTree(child.getChildren());
-  }
-}*/
